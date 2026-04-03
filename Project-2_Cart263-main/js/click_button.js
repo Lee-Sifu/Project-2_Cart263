@@ -68,25 +68,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Function to show a random image
 	function showRandomImage() {
+    const randomIndex = Math.floor(Math.random() * images.length);
+    const randomPositionX = Math.random() * (window.innerWidth - 100);
+    const randomPositionY = Math.random() * (window.innerHeight - 100);
 
-		// Random index
-		const randomIndex = Math.floor(Math.random() * images.length);
-		const randomPositionX = Math.random() * (window.innerWidth - 100); // Adjust for image width
-		const randomPositionY = Math.random() * (window.innerHeight - 100); // Adjust for image height
-		// Random rotation
-		const randomRotation = Math.random() * 360;
-		// Create image element
-		const img = document.createElement('img');
+    const img = document.createElement('img');
+    img.src = images[randomIndex];
+    img.classList.add('random-image');
+    img.style.position = 'absolute';
+    img.style.left = `${randomPositionX}px`;
+    img.style.top = `${randomPositionY}px`;
+    imageContainer.appendChild(img);
 
-		img.src = images[randomIndex];
-		img.classList.add('random-image');
-		img.style.position = 'absolute';
-		img.style.left = `${randomPositionX}px`;
-		img.style.top = `${randomPositionY}px`;
-		img.style.transform = `rotate(${randomRotation}deg)`;
-
-		imageContainer.appendChild(img);
-	}
+    anime({
+        targets: img,
+        scale: [0, 1.2, 1],       // overshoot then settle
+        rotate: {
+            value: Math.random() * 720,   // spin on the way in
+            easing: 'easeOutCubic'
+        },
+        opacity: [0, 1],
+        duration: 900,
+        easing: 'easeOutBounce'
+    });
+}
 
 	// Function to change background color
 	function changeBackgroundColor() {
