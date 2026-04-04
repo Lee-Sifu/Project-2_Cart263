@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     anime({
         targets: img,
-        scale: [{ value: 0 }, { value: 1.2 }, { value: 1 }],      // overshoot then settle
+        scale: [{ value: 0 }, { value: 1.5 }, { value: 1 }],      // overshoot then settle
         rotate: {
             value: Math.random() * 720,   // spin on the way in
             easing: 'easeOutCubic'
