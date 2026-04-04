@@ -114,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	function triggerShake() {
 		 anime({
             targets: document.body,
-            translateX: [-15, 15],
+            translateX: [-55, 45],
+			translateY: [-55, 45],
             direction: 'alternate',
             loop: 15,
             duration: 100,
