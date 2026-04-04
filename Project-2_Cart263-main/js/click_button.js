@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		countEl.textContent = count;
 		changeBackgroundColor();
 		changeBackgroundImage();
-
+		hasBroken = false; // Reset collapse mode if user clicks again
 		//Random picture spawn every 5 clicks
 		if (count % 5 === 0) {
 			showRandomImage();
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     anime({
         targets: img,
-       scale: [{ value: 0 }, { value: 1.2 }, { value: 1 }],      // overshoot then settle
+        scale: [{ value: 0 }, { value: 1.2 }, { value: 1 }],      // overshoot then settle
         rotate: {
             value: Math.random() * 720,   // spin on the way in
             easing: 'easeOutCubic'
@@ -112,12 +112,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Trigger shake animation
 	function triggerShake() {
-		document.body.style.animation = "shake 0.5s infinite";
-
-		// Stop shaking after 3 seconds
-		setTimeout(() => {
-			document.body.style.animation = "";
-		}, 3000);
+		 anime({
+            targets: document.body,
+            translateX: [-15, 15],
+            direction: 'alternate',
+            loop: 15,
+            duration: 100,
+            easing: 'easeInOutSine',
+            complete: () => {
+                document.body.style.transform = '';
+            }
+        });
 	}
 
 	// Alert message in collapse mode
