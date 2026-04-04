@@ -29,8 +29,41 @@ document.addEventListener('DOMContentLoaded', () => {
 		'img/artwork4.jpg',
 	];
 
+	// particle click
+	function spawnParticles(x, y) {
+		const colors = ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#ff6b81', '#eccc68'];
+		const particleCount = 20;
+
+		 for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            left: ${x}px;
+            top: ${y}px;
+            pointer-events: none;
+            z-index: 9999;
+        `;
+        document.body.appendChild(particle);
+		anime({
+            targets: particle,
+            translateX: (Math.random() - 0.5) * 300,
+            translateY: (Math.random() - 0.5) * 300,
+            scale: [1, 0],
+            opacity: [1, 0],
+            duration: 800 + Math.random() * 400,
+            easing: 'easeOutExpo',
+            complete: () => particle.remove() // clean up DOM
+        });
+    }
+}
 	// Add click event listener to the click area
-	clickArea.addEventListener('click', () => {
+	clickArea.addEventListener('click', (e) => {
+		spawnParticles(e.clientX, e.clientY);
+
 		count += 1;
 		countEl.textContent = count;
 		changeBackgroundColor();
