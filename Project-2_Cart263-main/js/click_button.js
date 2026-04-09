@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				},
 				move: {
 					enable: true,
-					speed: 2,
+					speed: 9,
 					direction: 'none',
 					outModes: { default: 'out' }
 				}
