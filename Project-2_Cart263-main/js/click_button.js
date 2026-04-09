@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			translateY: [-55, 45],
             direction: 'alternate',
             loop: 15,
-            duration: 100,
+            duration: 150,
             easing: 'easeInOutSine', 
             complete: () => {
                 document.body.style.transform = '';
