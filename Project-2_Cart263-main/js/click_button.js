@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	const resetBtn = document.getElementById('reset-btn');
 	const imageContainer = document.getElementById('image-container');
 
+	initParticles();
+
 	// Initialize count from the displayed text, or start at 0 if it's not a number
 	let count = 0;
 	let hasBroken = false;
@@ -130,6 +132,46 @@ document.addEventListener('DOMContentLoaded', () => {
 	function changeBackgroundColor() {
 		const bgColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
 		document.body.style.backgroundColor = bgColor;
+	}
+
+	// Function to initialize particles.js
+	function initParticles() {
+		particlesJS('particles-js', {
+			particles: {
+				number: {
+					value: 80,
+					density: { enable: true, area: 800 }
+				},
+				color: { value: '#ffffff' },
+				shape: { type: 'circle' },
+				opacity: { value: 0.5 },
+				size: { value: { min: 1, max: 5 } },
+				links: {
+					enable: true,
+					distance: 150,
+					color: '#ffffff',
+					opacity: 0.4,
+					width: 1
+				},
+				move: {
+					enable: true,
+					speed: 2,
+					direction: 'none',
+					outModes: { default: 'out' }
+				}
+			},
+			interactivity: {
+				events: {
+					onHover: { enable: true, mode: 'repulse' },
+					onClick: { enable: true, mode: 'push' }
+				},
+				modes: {
+					repulse: { distance: 100 },
+					push: { quantity: 4 }
+				}
+			},
+			detectRetina: true
+		});
 	}
 
 	// Function to change background image with 50% chance
