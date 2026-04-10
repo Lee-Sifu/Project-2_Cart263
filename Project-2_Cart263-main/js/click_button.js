@@ -136,43 +136,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Function to initialize particles.js
 	function initParticles() {
-		particlesJS('particles-js', {
-			particles: {
-				number: {
-					value: 80,
-					density: { enable: true, area: 800 }
-				},
-				color: { value: '#ffffff' },
-				shape: { type: 'circle' },
-				opacity: { value: 0.5 },
-				size: { value: { min: 1, max: 5 } },
-				links: {
-					enable: true,
-					distance: 150,
-					color: '#ffffff',
-					opacity: 0.4,
-					width: 1
-				},
-				move: {
-					enable: true,
-					speed: 9,
-					direction: 'none',
-					outModes: { default: 'out' }
-				}
-			},
-			interactivity: {
-				events: {
-					onHover: { enable: true, mode: 'repulse' },
-					onClick: { enable: true, mode: 'push' }
-				},
-				modes: {
-					repulse: { distance: 100 },
-					push: { quantity: 4 }
-				}
-			},
-			detectRetina: true
-		});
-	}
+    particlesJS('particles-js', {
+        particles: {
+            number: {
+                value: 80,
+                density: { enable: true, value_area: 800 }
+            },
+            color: { value: '#ffffff' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.5 },
+            size: { value: 3, random: true },
+            line_linked: {
+                enable: true,
+                distance: 150,
+                color: '#ffffff',
+                opacity: 0.4,
+                width: 1
+            },
+            move: {
+                enable: true,
+                speed: 2,
+                direction: 'none',
+                out_mode: 'out'
+            }
+        },
+        interactivity: {
+            detect_on: 'window',
+            events: {
+                onhover: { enable: true, mode: 'repulse' },
+                onclick: { enable: true, mode: 'push' }
+            },
+            modes: {
+                repulse: { distance: 100 },
+                push: { particles_nb: 4 }
+            }
+        },
+        retina_detect: true
+    });
+}
 
 	// Function to change background image with 50% chance
 	function changeBackgroundImage() {

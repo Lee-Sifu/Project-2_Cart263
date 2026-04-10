@@ -46,6 +46,10 @@ body {
   z-index: -1;
 }
 
+#particles-js canvas {
+    pointer-events: none;
+}
+
 .reset-button {
   background-color: transparent;
   color: white;
