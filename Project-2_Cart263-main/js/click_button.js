@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		const colors = ['#ff4757', '#ffa502', '#2ed573', '#1e90ff', '#ff6b81', '#eccc68'];
 		const particleCount = 20;
 
-		 for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.style.cssText = `
+		for (let i = 0; i < particleCount; i++) {
+			const particle = document.createElement('div');
+			particle.style.cssText = `
             position: fixed;
             width: 10px;
             height: 10px;
@@ -49,19 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
             pointer-events: none;
             z-index: 9999;
         `;
-        document.body.appendChild(particle);
-		anime({
-            targets: particle,
-            translateX: (Math.random() - 0.5) * 300,
-            translateY: (Math.random() - 0.5) * 300,
-            scale: [1, 0],
-            opacity: [1, 0],
-            duration: 800 + Math.random() * 400,
-            easing: 'easeOutExpo',
-            complete: () => particle.remove() // clean up DOM
-        });
-    }
-}
+			document.body.appendChild(particle);
+			anime({
+				targets: particle,
+				translateX: (Math.random() - 0.5) * 300,
+				translateY: (Math.random() - 0.5) * 300,
+				scale: [1, 0],
+				opacity: [1, 0],
+				duration: 800 + Math.random() * 400,
+				easing: 'easeOutExpo',
+				complete: () => particle.remove() // clean up DOM
+			});
+		}
+	}
 	// Add click event listener to the click area
 	clickArea.addEventListener('click', (e) => {
 		spawnParticles(e.clientX, e.clientY);
@@ -103,30 +103,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Function to show a random image
 	function showRandomImage() {
-    const randomIndex = Math.floor(Math.random() * images.length);
-    const randomPositionX = Math.random() * (window.innerWidth - 100);
-    const randomPositionY = Math.random() * (window.innerHeight - 100);
+		const randomIndex = Math.floor(Math.random() * images.length);
+		const randomPositionX = Math.random() * (window.innerWidth - 100);
+		const randomPositionY = Math.random() * (window.innerHeight - 100);
 
-    const img = document.createElement('img');
-    img.src = images[randomIndex];
-    img.classList.add('random-image');
-    img.style.position = 'absolute';
-    img.style.left = `${randomPositionX}px`;
-    img.style.top = `${randomPositionY}px`;
-    imageContainer.appendChild(img);
+		const img = document.createElement('img');
+		img.src = images[randomIndex];
+		img.classList.add('random-image');
+		img.style.position = 'absolute';
+		img.style.left = `${randomPositionX}px`;
+		img.style.top = `${randomPositionY}px`;
+		imageContainer.appendChild(img);
 
-    anime({
-        targets: img,
-        scale: [{ value: 0 }, { value: 1.5 }, { value: 1.2 }],      // overshoot then settle
-        rotate: {
-            value: Math.random() * 720,   // spin on the way in
-            easing: 'easeOutCubic'
-        },
-        opacity: [0, 1],
-        duration: 900,
-        easing: 'easeOutBounce'
-    });
-}
+		anime({
+			targets: img,
+			scale: [{ value: 0 }, { value: 1.5 }, { value: 1.2 }],      // overshoot then settle
+			rotate: {
+				value: Math.random() * 720,   // spin on the way in
+				easing: 'easeOutCubic'
+			},
+			opacity: [0, 1],
+			duration: 900,
+			easing: 'easeOutBounce'
+		});
+	}
 
 	// Function to change background color
 	function changeBackgroundColor() {
@@ -136,44 +136,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Function to initialize particles.js
 	function initParticles() {
-    particlesJS('particles-js', {
-        particles: {
-            number: {
-                value: 80,
-                density: { enable: true, value_area: 800 }
-            },
-            color: { value: '#ffffff' },
-            shape: { type: 'circle' },
-            opacity: { value: 0.5 },
-            size: { value: 3, random: true },
-            line_linked: {
-                enable: true,
-                distance: 150,
-                color: '#ffffff',
-                opacity: 0.4,
-                width: 1
-            },
-            move: {
-                enable: true,
-                speed: 2,
-                direction: 'none',
-                out_mode: 'out'
-            }
-        },
-        interactivity: {
-            detect_on: 'window',
-            events: {
-                onhover: { enable: true, mode: 'repulse' },
-                onclick: { enable: true, mode: 'push' }
-            },
-            modes: {
-                repulse: { distance: 100 },
-                push: { particles_nb: 4 }
-            }
-        },
-        retina_detect: true
-    });
-}
+		particlesJS('particles-js', {
+			particles: {
+				number: {
+					value: 80,
+					density: { enable: true, value_area: 800 }
+				},
+				color: { value: '#ffffff' },
+				shape: { type: 'circle' },
+				opacity: { value: 0.5 },
+				size: { value: 3, random: true },
+				line_linked: {
+					enable: true,
+					distance: 150,
+					color: '#ffffff',
+					opacity: 0.4,
+					width: 1
+				},
+				move: {
+					enable: true,
+					speed: 2,
+					direction: 'none',
+					out_mode: 'out'
+				}
+			},
+			interactivity: {
+				detect_on: 'window',
+				events: {
+					onhover: { enable: true, mode: 'repulse' },
+					onclick: { enable: true, mode: 'push' }
+				},
+				modes: {
+					repulse: { distance: 100 },
+					push: { particles_nb: 4 }
+				}
+			},
+			retina_detect: true
+		});
+	}
 
 	// Function to change background image with 50% chance
 	function changeBackgroundImage() {
@@ -188,18 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Trigger shake animation
 	function triggerShake() {
-		 anime({
-            targets: document.body,
-            translateX: [-55, 45],
+		anime({
+			targets: document.body,
+			translateX: [-55, 45],
 			translateY: [-55, 45],
-            direction: 'alternate',
-            loop: 15,
-            duration: 150,
-            easing: 'easeInOutSine', 
-            complete: () => {
-                document.body.style.transform = '';
-            }
-        });
+			direction: 'alternate',
+			loop: 15,
+			duration: 150,
+			easing: 'easeInOutSine',
+			complete: () => {
+				document.body.style.transform = '';
+			}
+		});
 	}
 
 	// Alert message in collapse mode
@@ -233,3 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		document.body.style.animation = '';
 	}
 });
+
+if ('serviceWorker' in navigator) {
+	navigator.serviceWorker.register('../sw.js')
+		.then(() => console.log("SW registered"));
+}
