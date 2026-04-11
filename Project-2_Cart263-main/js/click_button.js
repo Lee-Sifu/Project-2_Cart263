@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     particlesJS('particles-js', {
         particles: {
-            number: { value: 200 },
+            number: { value: 50 },
             color: { value: ['#ff0000', '#ff6600', '#ffff00'] },
             shape: { type: 'star' },
             opacity: { value: 1, random: true },
@@ -202,8 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         interactivity: {
-            events: { onclick: { enable: true, mode: 'explode' } },
-            modes: { explode: { particles_nb: 30 } }
+			detect_on: 'window',
+            events: { onclick: { enable: true, mode: 'push' } },
+            modes: { push: { particles_nb: 30 } }
         }
     });
 }
