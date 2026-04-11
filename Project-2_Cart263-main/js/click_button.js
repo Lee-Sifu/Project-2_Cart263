@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			hasBroken = true;
 			triggerShake();
 			showWarningMessage();
+			chaoticParticles();
 		}
 
 		// Reset after 50 clicks
@@ -172,6 +173,20 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			},
 			retina_detect: true
+		});
+	}
+
+	// Function for chaostic particle effect
+	function chaoticParticles() {
+		anime({
+			targets: document.body,
+			translateX: () => (Math.random() - 0.5) * 100,
+			translateY: () => (Math.random() - 0.5) * 100,
+			scale: [1, 1.5],
+			rotate: () => Math.random() * 360,
+			duration: 500,
+			easing: 'easeInOutSine',
+			loop: true
 		});
 	}
 
