@@ -96,6 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		count = 0;
 		countEl.textContent = count;
+		window.pJSDom[0].pJS.fn.vendors.destroypJS(); // Destroy current particles instance
+		window.pJSDom = [];
+		initParticles(); // Reinitialize particles
+
 
 		imageContainer.innerHTML = '';
 		document.body.style.backgroundColor = '#ffffff'; // Reset background color to white
@@ -178,18 +182,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Function for chaostic particle effect
 	function chaoticParticles() {
-		anime({
-			targets: document.body,
-			translateX: () => (Math.random() - 0.5) * 100,
-			translateY: () => (Math.random() - 0.5) * 100,
-			scale: [1, 1.5],
-			rotate: () => Math.random() * 360,
-			duration: 500,
-			easing: 'easeInOutSine',
-			loop: true
-		});
-	}
+	  // Destroy current instance and restart with wild settings
+    window.pJSDom[0].pJS.fn.vendors.destroypJS();
+    window.pJSDom = [];
 
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 200 },
+            color: { value: ['#ff0000', '#ff6600', '#ffff00'] },
+            shape: { type: 'star' },
+            opacity: { value: 1, random: true },
+            size: { value: 10, random: true },
+            move: {
+                enable: true,
+                speed: 15,       // much faster
+                direction: 'none',
+                random: true,
+                out_mode: 'out'
+            }
+        },
+        interactivity: {
+            events: { onclick: { enable: true, mode: 'explode' } },
+            modes: { explode: { particles_nb: 30 } }
+        }
+    });
+}
 	// Function to change background image with 50% chance
 	function changeBackgroundImage() {
 		if (Math.random() < 0.5) {
@@ -241,6 +258,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		count = 0;
 		countEl.textContent = count;
 		hasBroken = false;
+		window.pJSDom[0].pJS.fn.vendors.destroypJS(); // Destroy current particles instance
+		window.pJSDom = [];
+		initParticles(); // Reinitialize particles
 
 		imageContainer.innerHTML = '';
 		document.body.style.backgroundColor = '#ffffff';
