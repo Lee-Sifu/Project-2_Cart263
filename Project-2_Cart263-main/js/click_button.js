@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	initParticles();
 
+	// Touch support for mobile devices
+	document.addEventListener('touchmove', (e) => {
+		const touch = e.touches[0];
+		const pJS = window.pJSDom[0].pJS;
+		if (pJS) {
+			pJS.interactivity.mouse.pos_x = touch.clientX;
+			pJS.interactivity.mouse.pos_y = touch.clientY;
+		}
+	});
+
 	// Initialize count from the displayed text, or start at 0 if it's not a number
 	let count = 0;
 	let hasBroken = false;
@@ -166,14 +176,18 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			},
 			interactivity: {
-				detect_on: 'window',
+				detect_on: 'canvas',
 				events: {
 					onhover: { enable: true, mode: 'repulse' },
-					onclick: { enable: true, mode: 'push' }
+					onclick: { enable: true, mode: ['push', 'repulse'] },
+					resize: true
 				},
 				modes: {
-					repulse: { distance: 100 },
-					push: { particles_nb: 4 }
+					repulse: {
+						distance: 120,
+						duration: 0.4
+					},
+					push: { particles_nb: 6 }
 				}
 			},
 			retina_detect: true
@@ -182,32 +196,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Function for chaostic particle effect
 	function chaoticParticles() {
-	  // Destroy current instance and restart with wild settings
-    window.pJSDom[0].pJS.fn.vendors.destroypJS();
-    window.pJSDom = [];
+		// Destroy current instance and restart with wild settings
+		window.pJSDom[0].pJS.fn.vendors.destroypJS();
+		window.pJSDom = [];
 
-    particlesJS('particles-js', {
-        particles: {
-            number: { value: 50 },
-            color: { value: ['#ff0000', '#ff6600', '#ffff00'] },
-            shape: { type: 'star' },
-            opacity: { value: 1, random: true },
-            size: { value: 10, random: true },
-            move: {
-                enable: true,
-                speed: 15,       // much faster
-                direction: 'none',
-                random: true,
-                out_mode: 'out'
-            }
-        },
-        interactivity: {
-			detect_on: 'window',
-            events: { onclick: { enable: true, mode: 'push' } },
-            modes: { push: { particles_nb: 30 } }
-        }
-    });
-}
+		particlesJS('particles-js', {
+			particles: {
+				number: { value: 50 },
+				color: { value: ['#ff0000', '#ff6600', '#ffff00'] },
+				shape: { type: 'star' },
+				opacity: { value: 1, random: true },
+				size: { value: 10, random: true },
+				move: {
+					enable: true,
+					speed: 15,       // much faster
+					direction: 'none',
+					random: true,
+					out_mode: 'out'
+				}
+			},
+			interactivity: {
+				detect_on: 'window',
+				events: { onclick: { enable: true, mode: 'push' } },
+				modes: { push: { particles_nb: 30 } }
+			}
+		});
+	}
 	// Function to change background image with 50% chance
 	function changeBackgroundImage() {
 		if (Math.random() < 0.5) {
