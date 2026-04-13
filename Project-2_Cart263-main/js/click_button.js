@@ -11,12 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Touch support for mobile devices
 	document.addEventListener('touchmove', (e) => {
 		const touch = e.touches[0];
-		const pJS = window.pJSDom[0].pJS;
+		const pJS = window.pJSDom[0]?.pJS;
+
 		if (pJS) {
 			pJS.interactivity.mouse.pos_x = touch.clientX;
 			pJS.interactivity.mouse.pos_y = touch.clientY;
+			pJS.interactivity.status = 'mousemove';
 		}
-	});
+	}, { passive: false });
 
 	// Initialize count from the displayed text, or start at 0 if it's not a number
 	let count = 0;
