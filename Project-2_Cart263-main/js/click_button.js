@@ -9,16 +9,27 @@ document.addEventListener('DOMContentLoaded', () => {
 	initParticles();
 
 	// Touch support for mobile devices
-	document.addEventListener('touchmove', (e) => {
+	function updateParticlesFromTouch(e) {
 		const touch = e.touches[0];
 		const pJS = window.pJSDom[0]?.pJS;
 
 		if (pJS) {
-			pJS.interactivity.mouse.pos_x = touch.clientX;
-			pJS.interactivity.mouse.pos_y = touch.clientY;
+			const canvas = pJS.canvas.el;
+			const rect = canvas.getBoundingClientRect();
+			const ratio = window.devicePixelRatio || 1;
+
+			const x = (touch.clientX - rect.left) * ratio;
+			const y = (touch.clientY - rect.top) * ratio;
+
+			pJS.interactivity.mouse.pos_x = x;
+			pJS.interactivity.mouse.pos_y = y;
 			pJS.interactivity.status = 'mousemove';
 		}
-	}, { passive: false });
+	}
+
+	//When finger starts touching
+	document.addEventListener('touchstart', updateParticlesFromTouch, { passive: false });
+	document.addEventListener('touchmove', updateParticlesFromTouch, { passive: false });
 
 	// Initialize count from the displayed text, or start at 0 if it's not a number
 	let count = 0;
