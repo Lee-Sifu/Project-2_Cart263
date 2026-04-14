@@ -6,7 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	const resetBtn = document.getElementById('reset-btn');
 	const imageContainer = document.getElementById('image-container');
 
+	let scene, camera, renderer, cube, fragments = [];
+	let isBroken3D = false;
+
 	initParticles();
+	initThree();
 
 	// Touch support for mobile devices
 	function updateParticlesFromTouch(e) {
@@ -87,6 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 	// Add click event listener to the click area
 	clickArea.addEventListener('click', (e) => {
+		shakeCube();
+
 		spawnParticles(e.clientX, e.clientY);
 
 		count += 1;
@@ -105,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			triggerShake();
 			showWarningMessage();
 			chaoticParticles();
+			breakCube();
 		}
 
 		// Reset after 50 clicks
@@ -207,6 +214,63 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+
+	// Three.js 3D breaking effect
+
+	function initThree() {
+		const container = document.getElementById('three-container');
+
+		scene = new THREE.Scene();
+
+		camera = new THREE.PerspectiveCamera(
+			75,
+			window.innerWidth / window.innerHeight,
+			0.1,
+			1000
+		);
+		camera.position.z = 5;
+
+		renderer = new THREE.WebGLRenderer({ alpha: true });
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		container.appendChild(renderer.domElement);
+
+		//light
+		const light = new THREE.PointLight(0xffffff, 1);
+		light.position.set(5, 5, 5);
+		scene.add(light);
+
+		//cube
+		const geometry = new THREE.BoxGeometry(2, 2, 2);
+		const material = new THREE.MeshStandardMaterial({
+			color: 0xffffff,
+			roughness: 0.5
+		});
+
+		cube = new THREE.Mesh(geometry, material);
+		scene.add(cube);
+
+		animate();
+	}
+
+	function animate() {
+		requestAnimationFrame(animate);
+
+		if (cube && !isBroken3D) {
+			cube.rotation.x += 0.005;
+			cube.rotation.y += 0.005;
+		}
+
+		// If in broken state, animate fragments
+		fragments.forEach(f => {
+			f.position.add(f.velocity);
+			f.rotation.x += 0.02;
+			f.rotation.y += 0.02;
+		});
+
+		renderer.render(scene, camera);
+	}
+
+
 	// Function for chaostic particle effect
 	function chaoticParticles() {
 		// Destroy current instance and restart with wild settings
@@ -262,6 +326,67 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+	// Shake effect for cube
+	function shakeCube() {
+		if (!cube || isBroken3D) return;
+
+		anime({
+			targets: cube.rotation,
+			x: cube.rotation.x + 0.3,
+			y: cube.rotation.y + 0.3,
+			duration: 200,
+			direction: 'alternate',
+			easing: 'easeInOutSine'
+		});
+	}
+
+	//Break cube into small cubes
+	function breakCube() {
+		if (isBroken3D) return;
+
+		isBroken3D = true;
+
+		scene.remove(cube);
+
+		const pieceSize = 0.5;
+
+		for (let x = -1; x <= 1; x++) {
+			for (let y = -1; y <= 1; y++) {
+				for (let z = -1; z <= 1; z++) {
+					const geo = new THREE.BoxGeometry(pieceSize, pieceSize, pieceSize);
+					const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+					const fragment = new THREE.Mesh(geo, mat);
+
+					fragment.position.set(x * 0.7, y * 0.7, z * 0.7);
+
+					fragment.velocity = new THREE.Vector3(
+						(Math.random() - 0.5) * 0.2,
+						(Math.random() - 0.5) * 0.2,
+						(Math.random() - 0.5) * 0.2
+					);
+
+					fragments.push(fragment);
+					scene.add(fragment);
+				}
+			}
+		}
+	}
+
+	//Reset cube
+	function resetCube() {
+		if (!scene) return;
+		fragments.forEach(f => scene.remove(f));
+		fragments = [];
+
+		isBroken3D = false;
+
+		const geometry = new THREE.BoxGeometry(2, 2, 2);
+		const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
+		cube = new THREE.Mesh(geometry, material);
+		scene.add(cube);
+	}
+
 	// Alert message in collapse mode
 	function showWarningMessage() {
 		const warning = document.createElement('div');
@@ -294,10 +419,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		document.body.style.backgroundColor = '#ffffff';
 		document.body.style.backgroundImage = '';
 		document.body.style.animation = '';
+
+		resetCube();
 	}
 });
 
 if ('serviceWorker' in navigator) {
-	navigator.serviceWorker.register('../sw.js')
+	navigator.serviceWorker.register('./sw.js')
 		.then(() => console.log("SW registered"));
 }
