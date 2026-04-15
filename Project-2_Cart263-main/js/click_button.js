@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const resetBtn = document.getElementById('reset-btn');
 	const imageContainer = document.getElementById('image-container');
 
-	let scene, camera, renderer, cube, fragments = [];
+	let scene, camera, renderer, cube, rubbleCube, fragments = [];
 	let isBroken3D = false;
 
 	let raycaster, mouse;
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Main click handler
 	function handleCubeClick(clientX, clientY) {
-		if (!cube || isBroken3D) return;
+		if (!cube && !rubbleCube) return;
 
 		shakeCube();
 		spawnParticles(clientX, clientY);
@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		countEl.textContent = count;
 		changeBackgroundColor();
 		changeBackgroundImage();
-		hasBroken = false; // Reset collapse mode if user clicks again
 
 		//Random picture spawn every 5 clicks
 		if (count % 5 === 0) {
@@ -262,14 +261,19 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function onCubePointerClick(event) {
-		if (!cube || isBroken3D) return;
+		if ((!cube && !rubbleCube)) return;
 
 		const rect = renderer.domElement.getBoundingClientRect();
 		mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
 		mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
 		raycaster.setFromCamera(mouse, camera);
-		const intersects = raycaster.intersectObject(cube);
+
+		const clickableObjects = [];
+		if (cube) clickableObjects.push(cube);
+		if (rubbleCube) clickableObjects.push(rubbleCube);
+
+		const intersects = raycaster.intersectObjects(clickableObjects, false);
 
 		if (intersects.length > 0) {
 			handleCubeClick(event.clientX, event.clientY);
@@ -277,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function onCubeTouchStart(event) {
-		if (!cube || isBroken3D) return;
+		if ((!cube && !rubbleCube)) return;
 
 		const touch = event.touches[0];
 		const rect = renderer.domElement.getBoundingClientRect();
@@ -286,7 +290,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
 
 		raycaster.setFromCamera(mouse, camera);
-		const intersects = raycaster.intersectObject(cube);
+
+		const clickableObjects = [];
+		if (cube) clickableObjects.push(cube);
+		if (rubbleCube) clickableObjects.push(rubbleCube);
+
+		const intersects = raycaster.intersectObjects(clickableObjects, false);
 
 		if (intersects.length > 0) {
 			handleCubeClick(touch.clientX, touch.clientY);
@@ -302,9 +311,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	function animate() {
 		requestAnimationFrame(animate);
 
-		if (cube && !isBroken3D) {
+		if (cube) {
 			cube.rotation.x += 0.005;
 			cube.rotation.y += 0.005;
+		}
+
+		if (rubbleCube) {
+			rubbleCube.rotation.x += 0.01;
+			rubbleCube.rotation.y += 0.01;
 		}
 
 		// If in broken state, animate fragments
@@ -376,12 +390,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Shake effect for cube
 	function shakeCube() {
-		if (!cube || isBroken3D) return;
+		const target = cube || rubbleCube;
+		if (!target) return;
 
 		anime({
-			targets: cube.rotation,
-			x: cube.rotation.x + 0.3,
-			y: cube.rotation.y + 0.3,
+			targets: target.rotation,
+			x: target.rotation.x + 0.3,
+			y: target.rotation.y + 0.3,
 			duration: 200,
 			direction: 'alternate',
 			easing: 'easeInOutSine'
@@ -393,8 +408,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (isBroken3D) return;
 
 		isBroken3D = true;
-		scene.remove(cube);
-		cube = null;
+
+		if (cube) {
+			scene.remove(cube);
+			cube.geometry.dispose();
+			cube.material.dispose();
+			cube = null;
+		}
 
 		const pieceSize = 0.5;
 
@@ -417,14 +437,45 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			}
 		}
+
+		// Keep a rubble cube
+		const rubbleGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+		const rubbleMaterial = new THREE.MeshStandardMaterial({
+			color: 0xcccccc,
+			roughness: 0.8
+		});
+
+		rubbleCube = new THREE.Mesh(rubbleGeometry, rubbleMaterial);
+		rubbleCube.position.set(0, 0, 0);
+		rubbleCube.rotation.set(0.6, 0.8, 0.3);
+		scene.add(rubbleCube);
 	}
 
 	//Reset cube
 	function resetCube() {
-		fragments.forEach(f => scene.remove(f));
+		if (cube) {
+			scene.remove(cube);
+			cube.geometry.dispose();
+			cube.material.dispose();
+			cube = null;
+		}
+
+		if (rubbleCube) {
+			scene.remove(rubbleCube);
+			rubbleCube.geometry.dispose();
+			rubbleCube.material.dispose();
+			rubbleCube = null;
+		}
+
+		fragments.forEach(f => {
+			scene.remove(f);
+			f.geometry.dispose();
+			f.material.dispose();
+		});
 		fragments = [];
 
 		isBroken3D = false;
+
 		createCube();
 	}
 
