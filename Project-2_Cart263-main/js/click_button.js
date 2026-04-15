@@ -1,13 +1,14 @@
 console.log("JS Loaded");
 
 document.addEventListener('DOMContentLoaded', () => {
-	const clickArea = document.getElementById('click-area');
 	const countEl = document.getElementById('click-count');
 	const resetBtn = document.getElementById('reset-btn');
 	const imageContainer = document.getElementById('image-container');
 
 	let scene, camera, renderer, cube, fragments = [];
 	let isBroken3D = false;
+
+	let raycaster, mouse;
 
 	initParticles();
 	initThree();
@@ -66,17 +67,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		for (let i = 0; i < particleCount; i++) {
 			const particle = document.createElement('div');
 			particle.style.cssText = `
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: ${colors[Math.floor(Math.random() * colors.length)]};
-            left: ${x}px;
-            top: ${y}px;
-            pointer-events: none;
-            z-index: 9999;
-        `;
+				position: fixed;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background: ${colors[Math.floor(Math.random() * colors.length)]};
+				left: ${x}px;
+				top: ${y}px;
+				pointer-events: none;
+				z-index: 9999;
+			`;
 			document.body.appendChild(particle);
+
 			anime({
 				targets: particle,
 				translateX: (Math.random() - 0.5) * 300,
@@ -85,21 +87,24 @@ document.addEventListener('DOMContentLoaded', () => {
 				opacity: [1, 0],
 				duration: 800 + Math.random() * 400,
 				easing: 'easeOutExpo',
-				complete: () => particle.remove() // clean up DOM
+				complete: () => particle.remove()
 			});
 		}
 	}
-	// Add click event listener to the click area
-	clickArea.addEventListener('click', (e) => {
-		shakeCube();
 
-		spawnParticles(e.clientX, e.clientY);
+	// Main click handler
+	function handleCubeClick(clientX, clientY) {
+		if (!cube || isBroken3D) return;
+
+		shakeCube();
+		spawnParticles(clientX, clientY);
 
 		count += 1;
 		countEl.textContent = count;
 		changeBackgroundColor();
 		changeBackgroundImage();
 		hasBroken = false; // Reset collapse mode if user clicks again
+
 		//Random picture spawn every 5 clicks
 		if (count % 5 === 0) {
 			showRandomImage();
@@ -118,22 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (count === 50) {
 			autoReset();
 		}
-	});
+	}
 
-	// Add click event listener to the reset button
+	// Add click event listener to the rest button
 	resetBtn.addEventListener('click', (e) => {
 		e.stopPropagation();
-
-		count = 0;
-		countEl.textContent = count;
-		window.pJSDom[0].pJS.fn.vendors.destroypJS(); // Destroy current particles instance
-		window.pJSDom = [];
-		initParticles(); // Reinitialize particles
-
-
-		imageContainer.innerHTML = '';
-		document.body.style.backgroundColor = '#ffffff'; // Reset background color to white
-		document.body.style.backgroundImage = ''; // Remove background image
+		resetAll();
 	});
 
 	// Function to show a random image
@@ -152,9 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		anime({
 			targets: img,
-			scale: [{ value: 0 }, { value: 1.5 }, { value: 1.2 }],      // overshoot then settle
+			scale: [{ value: 0 }, { value: 1.5 }, { value: 1.2 }], // overshoot then settle
 			rotate: {
-				value: Math.random() * 720,   // spin on the way in
+				value: Math.random() * 720, // spin on the way in
 				easing: 'easeOutCubic'
 			},
 			opacity: [0, 1],
@@ -165,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Function to change background color
 	function changeBackgroundColor() {
-		const bgColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+		const bgColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 		document.body.style.backgroundColor = bgColor;
 	}
 
@@ -216,7 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 	// Three.js 3D breaking effect
-
 	function initThree() {
 		const container = document.getElementById('three-container');
 
@@ -230,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		);
 		camera.position.z = 5;
 
-		renderer = new THREE.WebGLRenderer({ alpha: true });
+		renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		container.appendChild(renderer.domElement);
 
@@ -239,7 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
 		light.position.set(5, 5, 5);
 		scene.add(light);
 
-		//cube
+		const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+		scene.add(ambientLight);
+
+		createCube();
+
+		raycaster = new THREE.Raycaster();
+		mouse = new THREE.Vector2();
+
+		renderer.domElement.addEventListener('click', onCubePointerClick);
+		renderer.domElement.addEventListener('touchstart', onCubeTouchStart, { passive: true });
+
+		window.addEventListener('resize', onWindowResize);
+
+		animate();
+	}
+
+	// Cube
+	function createCube() {
 		const geometry = new THREE.BoxGeometry(2, 2, 2);
 		const material = new THREE.MeshStandardMaterial({
 			color: 0xffffff,
@@ -248,8 +259,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		cube = new THREE.Mesh(geometry, material);
 		scene.add(cube);
+	}
 
-		animate();
+	function onCubePointerClick(event) {
+		if (!cube || isBroken3D) return;
+
+		const rect = renderer.domElement.getBoundingClientRect();
+		mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+		mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+		raycaster.setFromCamera(mouse, camera);
+		const intersects = raycaster.intersectObject(cube);
+
+		if (intersects.length > 0) {
+			handleCubeClick(event.clientX, event.clientY);
+		}
+	}
+
+	function onCubeTouchStart(event) {
+		if (!cube || isBroken3D) return;
+
+		const touch = event.touches[0];
+		const rect = renderer.domElement.getBoundingClientRect();
+
+		mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+		mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+
+		raycaster.setFromCamera(mouse, camera);
+		const intersects = raycaster.intersectObject(cube);
+
+		if (intersects.length > 0) {
+			handleCubeClick(touch.clientX, touch.clientY);
+		}
+	}
+
+	function onWindowResize() {
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize(window.innerWidth, window.innerHeight);
 	}
 
 	function animate() {
@@ -286,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				size: { value: 10, random: true },
 				move: {
 					enable: true,
-					speed: 15,       // much faster
+					speed: 15,
 					direction: 'none',
 					random: true,
 					out_mode: 'out'
@@ -299,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		});
 	}
+
 	// Function to change background image with 50% chance
 	function changeBackgroundImage() {
 		if (Math.random() < 0.5) {
@@ -345,8 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (isBroken3D) return;
 
 		isBroken3D = true;
-
 		scene.remove(cube);
+		cube = null;
 
 		const pieceSize = 0.5;
 
@@ -358,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					const fragment = new THREE.Mesh(geo, mat);
 
 					fragment.position.set(x * 0.7, y * 0.7, z * 0.7);
-
 					fragment.velocity = new THREE.Vector3(
 						(Math.random() - 0.5) * 0.2,
 						(Math.random() - 0.5) * 0.2,
@@ -374,17 +421,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	//Reset cube
 	function resetCube() {
-		if (!scene) return;
 		fragments.forEach(f => scene.remove(f));
 		fragments = [];
 
 		isBroken3D = false;
-
-		const geometry = new THREE.BoxGeometry(2, 2, 2);
-		const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-
-		cube = new THREE.Mesh(geometry, material);
-		scene.add(cube);
+		createCube();
 	}
 
 	// Alert message in collapse mode
@@ -392,10 +433,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		const warning = document.createElement('div');
 		warning.textContent = "YOU ARE BREAKING THE SYSTEM!";
 		warning.id = 'system-warning';
-
 		document.body.appendChild(warning);
 
-		// Remove warning after 3 seconds
 		setTimeout(() => {
 			warning.remove();
 		}, 3000);
@@ -411,12 +450,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		count = 0;
 		countEl.textContent = count;
 		hasBroken = false;
-		window.pJSDom[0].pJS.fn.vendors.destroypJS(); // Destroy current particles instance
+
+		window.pJSDom[0].pJS.fn.vendors.destroypJS();
 		window.pJSDom = [];
-		initParticles(); // Reinitialize particles
+		initParticles();
 
 		imageContainer.innerHTML = '';
-		document.body.style.backgroundColor = '#ffffff';
+		document.body.style.backgroundColor = '#000000';
 		document.body.style.backgroundImage = '';
 		document.body.style.animation = '';
 
